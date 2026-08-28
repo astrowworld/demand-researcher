@@ -52,3 +52,19 @@ def test_process_submission_skips_non_demand_post():
 
     assert result is None
     assert calls == []  # classifier never invoked — pre-filter saved the LLM call
+
+
+def test_process_submission_keeps_already_absolute_permalink():
+    submission = make_submission(
+        permalink="https://reddit.com/r/hardwareswap/comments/xyz789/cherche_une_3ds"
+    )
+
+    def fake_classify(title, body):
+        return {"categorie": "produit", "quoi": "3DS craquée", "score": 90}
+
+    def fake_store(signal):
+        return 1
+
+    result = process_submission(submission, classify_fn=fake_classify, store_fn=fake_store)
+
+    assert result["permalink"] == "https://reddit.com/r/hardwareswap/comments/xyz789/cherche_une_3ds"

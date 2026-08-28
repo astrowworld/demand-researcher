@@ -33,7 +33,8 @@ def process_submission(submission, classify_fn=classify_post, store_fn=None) -> 
     return signal
 
 
-def watch_stream(subreddit_name: str, reddit, conn) -> None:
+def watch_stream(subreddit_name: str, reddit) -> None:
+    conn = db.get_conn()
     for submission in reddit_client.stream_submissions(reddit, subreddit_name):
         try:
             process_submission(
@@ -47,12 +48,11 @@ def watch_stream(subreddit_name: str, reddit, conn) -> None:
 def run_collector() -> None:
     logging.basicConfig(level=logging.INFO)
     reddit = reddit_client.get_reddit_instance()
-    conn = db.get_conn()
-    db.init_db(conn)
+    db.init_db(db.get_conn())
 
     sources = ["all"] + config.TARGETED_SUBS
     threads = [
-        threading.Thread(target=watch_stream, args=(source, reddit, conn), daemon=True)
+        threading.Thread(target=watch_stream, args=(source, reddit), daemon=True)
         for source in sources
     ]
     for thread in threads:
