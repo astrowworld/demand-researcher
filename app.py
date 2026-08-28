@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from flask import Flask, render_template, request
 
 import db
@@ -11,6 +15,7 @@ def create_app(db_path: str | None = None) -> Flask:
     def index():
         categorie = request.args.get("categorie") or None
         conn = db.get_conn(app.config["DB_PATH"])
+        db.init_db(conn)
         signals = db.get_signals(conn, categorie=categorie)
         conn.close()
         return render_template("index.html", signals=signals, categorie=categorie)

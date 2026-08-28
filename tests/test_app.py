@@ -48,3 +48,14 @@ def test_index_filters_by_categorie(client):
     response = client.get("/?categorie=produit")
     assert b"3DS craqu\xc3\xa9e" in response.data
     assert b"d\xc3\xa9veloppeur React" not in response.data
+
+
+def test_index_works_on_first_run_before_any_signal_exists(tmp_path):
+    db_path = str(tmp_path / "fresh.db")
+
+    app = create_app(db_path=db_path)
+    app.config["TESTING"] = True
+    with app.test_client() as test_client:
+        response = test_client.get("/")
+
+    assert response.status_code == 200

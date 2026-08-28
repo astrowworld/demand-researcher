@@ -27,7 +27,6 @@ compte, pas de SaaS — voir `docs/superpowers/specs/2026-08-28-demand-researche
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env  # puis remplir les clés
-export $(cat .env | xargs)
 python run_collector.py &   # collecteur en fond
 python app.py                # dashboard sur http://127.0.0.1:5000
 ```

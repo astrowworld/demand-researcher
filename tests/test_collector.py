@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 
+import db
 from collector import process_submission
 
 
@@ -68,3 +69,32 @@ def test_process_submission_keeps_already_absolute_permalink():
     result = process_submission(submission, classify_fn=fake_classify, store_fn=fake_store)
 
     assert result["permalink"] == "https://reddit.com/r/hardwareswap/comments/xyz789/cherche_une_3ds"
+
+
+def test_process_submission_with_real_store_fn_persists_to_db(tmp_path):
+    """Integration test: exercise the real db.insert_signal adapter (not a fake list),
+    to verify process_submission's signal dict actually matches the DB schema/contract."""
+    db_path = str(tmp_path / "integration.db")
+    conn = db.get_conn(db_path)
+    db.init_db(conn)
+
+    submission = make_submission()
+
+    def fake_classify(title, body):
+        return {"categorie": "produit", "quoi": "3DS craquée", "score": 90}
+
+    result = process_submission(
+        submission,
+        classify_fn=fake_classify,
+        store_fn=lambda signal: db.insert_signal(conn, signal),
+    )
+
+    assert result is not None
+
+    rows = db.get_signals(conn)
+    assert len(rows) == 1
+    assert rows[0]["reddit_id"] == result["reddit_id"]
+    assert rows[0]["categorie"] == result["categorie"]
+    assert rows[0]["quoi"] == result["quoi"]
+    assert rows[0]["score"] == result["score"]
+    assert rows[0]["permalink"] == result["permalink"]
