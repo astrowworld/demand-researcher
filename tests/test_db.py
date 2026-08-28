@@ -59,3 +59,18 @@ def test_get_signals_orders_by_score_desc(conn):
 
     rows = get_signals(conn)
     assert [r["reddit_id"] for r in rows] == ["high", "low"]
+
+
+def test_stores_bruit_with_zero_score(conn):
+    """Never discard low-score posts — bruit signals with score=0 are valid."""
+    row_id = insert_signal(
+        conn,
+        make_signal(reddit_id="noise1", categorie="bruit", quoi="low quality post", score=0)
+    )
+    assert row_id is not None
+
+    rows = get_signals(conn, categorie="bruit")
+    assert len(rows) == 1
+    assert rows[0]["categorie"] == "bruit"
+    assert rows[0]["score"] == 0
+    assert rows[0]["quoi"] == "low quality post"

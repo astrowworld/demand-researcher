@@ -40,8 +40,12 @@ def insert_signal(conn: sqlite3.Connection, signal: dict) -> int | None:
         )
         conn.commit()
         return cur.lastrowid
-    except sqlite3.IntegrityError:
-        return None
+    except sqlite3.IntegrityError as e:
+        # Only treat as dedup if it's a UNIQUE constraint on reddit_id
+        if "UNIQUE constraint failed" in str(e) and "reddit_id" in str(e):
+            return None
+        # Re-raise any other IntegrityError (e.g. NOT NULL violations)
+        raise
 
 
 def get_signals(conn: sqlite3.Connection, categorie: str | None = None) -> list[dict]:
