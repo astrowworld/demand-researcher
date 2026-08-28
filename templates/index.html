@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Demand Researcher</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border-bottom: 1px solid #ddd; padding: 0.5rem; text-align: left; }
+    .produit { color: #0a7d2c; }
+    .prestation { color: #1a5fb4; }
+    .bruit { color: #999; }
+    nav a { margin-right: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Demand Researcher</h1>
+  <nav>
+    <a href="/">Tout</a>
+    <a href="/?categorie=produit">Produits</a>
+    <a href="/?categorie=prestation">Prestations</a>
+  </nav>
+  <table>
+    <thead>
+      <tr><th>Score</th><th>Catégorie</th><th>Quoi</th><th>Sub</th><th>Lien</th></tr>
+    </thead>
+    <tbody>
+      {% for s in signals %}
+      <tr>
+        <td>{{ s.score }}</td>
+        <td class="{{ s.categorie }}">{{ s.categorie }}</td>
+        <td>{{ s.quoi }}</td>
+        <td>r/{{ s.sub }}</td>
+        <td><a href="{{ s.permalink }}" target="_blank">post</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>
